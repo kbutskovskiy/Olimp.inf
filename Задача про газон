@@ -1,0 +1,32 @@
+#include <cstdio>
+#include <algorithm>
+
+int main(){
+    long long minX, minY, maxX, maxY;
+    scanf("%lld %lld %lld %lld", &minX, &minY, &maxX, &maxY);
+    long long xc, yc, r;
+    scanf("%lld %lld %lld", &xc, &yc, &r);
+    minX-=xc;
+    minY-=yc;
+    maxX-=xc;
+    maxY-=yc;
+    long long sum =0;
+    long long y=0;
+    for(long long x=-r; x<=r; x++){
+        while(x*x+(y+1)*(y+1)<=r*r){
+            y++;
+        }
+        while(x*x+y*y>r*r){
+            y--;
+        }
+        if(minX<=x && x<=maxX){
+            long long min1 = minY;
+            long long max1 = maxY;
+            long long min2 = -y;
+            long long max2 = y;
+            sum+=std::max(0LL, std::min(max1, max2) -std::max(min1, min2)+1);
+        }
+    }
+    printf("%lld", sum);
+    return 0;
+}
