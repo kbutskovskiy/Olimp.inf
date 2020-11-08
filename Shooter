@@ -1,0 +1,49 @@
+#include <iostream>
+#include <cmath>
+using namespace std;
+
+int main(){
+    int N;
+    cin>>N;
+    int f, p, k;
+    double x, y, phi;
+    double A[N];
+    for(int i =0; i<N; i++){
+        cin>>x>>y;
+        if(x > 0 && y>=0){
+            phi = atan(y/x);
+        }
+        if(x > 0 && y<0){
+            phi = atan(y/x) + 2*3.141592;
+        }
+        if(x <0){
+            phi = atan(y/x) + 3.141592;
+        }
+        if(x == 0 && y<0){
+            phi = 3/2*3.141592;
+        }
+        if(x == 0 && y>0){
+            phi = 3.141592/2;
+        }
+        if(i>=1){
+            for(int j = 0; j<=i; j++){
+                if(A[j] == phi){
+                    f+=1;
+                    break;
+                }
+            }
+            if(f!=1){
+                A[i] = phi;
+            }
+            else{
+                p+=1;// повторения
+            }
+        }
+        else{
+            A[i]=phi;
+        }
+        f=0;
+    }
+    cout<<N-p;
+    return 0;
+}
