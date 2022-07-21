@@ -247,7 +247,8 @@ void input(Node* &cur, Node*& root){
 
 int main() {
     Node* root = new Node;
-    Node* cur = root;
+    Node* cur = new Node;
+    cur = root;
     input(cur, root);
     input(cur, root);
     input(cur, root);
