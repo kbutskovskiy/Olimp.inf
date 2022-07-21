@@ -1,0 +1,256 @@
+//C++17. Здесь я попытался сделать AVL-дерево. Выходит сбалансированное дерево, это здорово. Балансируется при добавлении элемента.
+#include <iostream>
+
+struct Node{
+    Node* left;
+    Node* right;
+    int bf;
+    int data;
+
+    Node(){
+        left = nullptr;
+        right = nullptr;
+        bf = 0;
+        data = NULL;
+    }
+
+    ~Node(){
+        delete left; left = nullptr;
+        delete right; right = nullptr;
+    }
+};
+
+void lr(Node*& root, Node*& cur, Node*& prev){
+    if(cur == root){
+        cur = cur->left->right;
+        root->left->right = cur->left;
+        cur->left = root->left;
+        root->left = cur->right;
+        cur->right = root;
+        root = cur;
+        root->bf = 0;
+        root->left->bf = 0;
+        root->right->bf = 0;
+    }
+    else{
+        if(prev->right == cur){
+            cur = cur->left->right;
+            prev->right->left->right = cur->left;
+            cur->left = prev->right->left;
+            prev->right->left = cur->right;
+            cur->right = prev->right;
+            prev->right = cur;
+            prev->right->bf = 0;
+            prev->right->left->bf = 0;
+            prev->right->right->bf = 0;
+        }
+        if(prev->left == cur){
+            cur = cur->left->right;
+            prev->left->left->right = cur->left;
+            cur->left = prev->left->left;
+            prev->left->left = cur->right;
+            cur->right = prev->left;
+            prev->left = cur;
+            prev->left->bf = 0;
+            prev->left->left->bf = 0;
+            prev->left->right->bf = 0;
+        }
+    }
+}
+
+void rr(Node*& root, Node*& cur, Node*& prev){
+    if(cur == root){
+        cur = cur->right;
+        root->right = cur->left;
+        cur->left = root;
+        root = cur;
+        root->bf = 0;
+        root->left->bf = 0;
+        root->right->bf = 0;
+    }
+    else{
+        if(prev->right == cur){
+            cur = cur->right;
+            prev->right->right = cur->left;
+            cur->left = prev->right;
+            prev->right = cur;
+            cur->bf=0;
+            cur->left->bf = 0;
+            cur->right->bf = 0;
+        }
+        if(prev->left == cur){
+            cur = cur->right;
+            prev->left->right = cur->left;
+            cur->left = prev->left;
+            prev->left = cur;
+            cur->bf=0;
+            cur->left->bf = 0;
+            cur->right->bf = 0;
+        }
+    }
+}
+
+void rl(Node*& root, Node*& cur, Node*& prev){
+    if(cur == root){
+        cur = cur->right->left;
+        root->right->left = cur->right;
+        cur->right = root->right;
+        root->right = cur->left;
+        cur->left = root;
+        root = cur;
+        root->bf = 0;
+        root->left->bf = 0;
+        root->right->bf = 0;
+    }
+    else{
+        if(prev->right == cur){
+            cur = cur->right->left;
+            prev->right->right->left = cur->right;
+            cur->right = prev->right->right;
+            prev->right->right = cur->left;
+            cur->left = prev->right;
+            prev->right = cur;
+            cur->bf = 0;
+            cur->left->bf = 0;
+            cur->right->bf = 0;
+        }
+        if(prev->left == cur){
+            cur = cur->right->left;
+            prev->left->right->left = cur->right;
+            cur->right = prev->left->right;
+            prev->left->right = cur->left;
+            cur->left = prev->left;
+            prev->left = cur;
+            cur->bf = 0;
+            cur->left->bf = 0;
+            cur->right->bf = 0;
+        }
+    }
+}
+
+void ll(Node*& root, Node*& cur, Node* &prev){
+    if(cur == root){
+        cur = cur->left;
+        root->left = cur->right;
+        cur->right = root;
+        root = cur;
+        root->bf = 0;
+        root->left->bf = 0;
+        root->right->bf = 0;
+    }
+    else{
+        if(prev->left == cur){
+            cur = cur->left;
+            prev->left->left = cur->right;
+            cur->right = prev->left;
+            prev->left = cur;
+            cur->bf=0;
+            cur->left->bf = 0;
+            cur->right->bf = 0;
+        }
+        if(prev->right == cur){
+            cur = cur->left;
+            prev->right->left = cur->right;
+            cur->right = prev->right;
+            prev->right = cur;
+            cur->bf=0;
+            cur->left->bf = 0;
+            cur->right->bf = 0;
+        }
+    }
+}
+
+void turning(Node*& root, Node*& cur, int& a){
+    cur = root;
+    Node* prev = new Node;
+    prev = cur;
+    int f = 4, c = 0;
+    while((cur->left!= nullptr && a<cur->data) || (cur->right!= nullptr && a>=cur->data)) {
+        if(cur->data == a){
+            break;
+        }
+        else{
+            if(cur->bf == 2 && cur->left->bf == 1){
+                ll(root, cur, prev);
+                --f;
+                break;
+            }
+            if(cur->bf == -2 && cur->right->bf == -1){
+                rr(root, cur, prev);
+                --f;
+                break;
+            }
+            if(cur->bf == -2 && cur->right->bf == 1){
+                rl(root, cur, prev);
+                --f;
+                break;
+            }
+            if(cur->bf == 2 && cur->left->bf == -1){
+                lr(root, cur, prev);
+                --f;
+                break;
+            }
+            ++c;
+            if(c==1){
+                if(cur->data > a){
+                    cur = cur->left;
+                }
+                else{
+                    cur = cur->right;
+                }
+            }
+            else{
+                if(cur->data > a){
+                    prev = cur;
+                    cur = cur->left;
+                }
+                else{
+                    prev = cur;
+                    cur = cur->right;
+                }
+            }
+        }
+    }
+    if(f!=4)
+        turning(root, cur, a);
+}
+
+void input(Node* &cur, Node*& root){
+    Node* elem = new Node;
+    std::cout << "Input elem's data: "; std::cin >> elem->data;
+    if(root->data == NULL){
+        root->data = elem->data;
+    }
+    else{
+        while((cur->left!= nullptr && elem->data<cur->data) || (cur->right!= nullptr && elem->data>=cur->data)){
+            if(cur->data > elem->data){
+                cur->bf+=1;
+                cur = cur->left;
+            }
+            else{
+                cur->bf-=1;
+                cur = cur->right;
+            }
+        }
+        if(elem->data < cur->data){
+            cur->bf+=1;
+            cur->left = elem;
+        }
+        else {
+            cur->bf -= 1;
+            cur->right = elem;
+        }
+    }
+    turning(root, cur, elem->data);
+    cur = root;
+}
+
+int main() {
+    Node* root = new Node;
+    Node* cur = root;
+    input(cur, root);
+    input(cur, root);
+    input(cur, root);
+    std::cout << std::endl << root->data;
+    return 0;
+}
