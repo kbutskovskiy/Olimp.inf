@@ -1,0 +1,144 @@
+//Здесь реализовывал свой вектор
+
+#include <iostream>
+
+template<class TypeOfElement>
+class MyVector {
+private:
+    int length;
+    int capacity;
+    TypeOfElement *dataPointer;
+
+    void UpCapacity(int newCapacity) {
+        if (newCapacity > capacity) {
+            TypeOfElement *tmp = new TypeOfElement[length];
+            for (int i = 0; i < length; ++i) {
+                tmp[i] = dataPointer[i];
+            }
+            delete[] dataPointer;
+            dataPointer = new TypeOfElement[newCapacity];
+            for (int i = 0; i < length; ++i) {
+                dataPointer[i] = tmp[i];
+            }
+            capacity = newCapacity;
+            delete[] tmp;
+            tmp = nullptr;
+        }
+    }
+
+public:
+
+    MyVector(const MyVector &);
+
+    MyVector() {
+        length = 0;
+        capacity = 1;
+        dataPointer = new TypeOfElement[1];
+    }
+
+    ~MyVector() {
+        delete[] dataPointer;
+        dataPointer = nullptr;
+        length = 0;
+    }
+
+    void PushBack(TypeOfElement newElement) {
+        UpCapacity(length + 1);
+        dataPointer[length] = newElement;
+        length++;
+    }
+
+    TypeOfElement &operator[](int index) const {
+        return *(dataPointer + index);
+    }
+
+    bool IsEmpty() const {
+        return (length == 0);
+    }
+
+    int Length() const {
+        return length;
+    }
+
+    int Capacity() const {
+        return capacity;
+    }
+
+    MyVector &operator=(const MyVector &);
+
+    MyVector<TypeOfElement> operator+(const MyVector &);
+
+};
+
+template<typename TypeOfElement>
+MyVector<TypeOfElement>::MyVector(const MyVector<TypeOfElement> &rhs) {
+    this->length = rhs.Length();
+    this->capacity = rhs.Capacity();
+    this->dataPointer = new TypeOfElement[this->capacity];
+    for (int i = 0; i < this->capacity; ++i)
+        this->dataPointer[i] = rhs[i];
+}
+
+
+template<class TypeOfElement>
+MyVector<TypeOfElement> &MyVector<TypeOfElement>::operator=(const MyVector<TypeOfElement> &vec2) {
+    MyVector<TypeOfElement> t(vec2);
+    if (this->capacity != 0) {
+        delete[] this->dataPointer;
+    }
+    this->length = t.Length();
+    this->capacity = t.Capacity();
+    this->dataPointer = new TypeOfElement[this->capacity];
+    for (int i = 0; i < this->capacity; ++i) {
+        this->dataPointer[i] = t[i];
+    }
+    return *this;
+}
+
+template<class TypeOfElement>
+MyVector<TypeOfElement> MyVector<TypeOfElement>::operator+(const MyVector<TypeOfElement> &rhs) {
+    MyVector<TypeOfElement> res = *this;
+    for (int i = 0; i < rhs.Length(); ++i) {
+        res.PushBack(rhs[i]);
+    }
+    return res;
+}
+
+template<class MyType>
+void MySwap(MyType &element1, MyType &element2) {
+    MyType tmp = element1;
+    element1 = element2;
+    element2 = tmp;
+}
+
+template<class TypeOfElement>
+void InputMyVector(MyVector<TypeOfElement> &inVector, int N) {
+    std::cout << "Input vector elements: " << std::endl;
+    TypeOfElement k = 0;
+    for (int i = 0; i < N; ++i) {
+        std::cin >> k;
+        inVector.PushBack(k);
+    }
+}
+
+template<class TypeOfElement>
+void OutputMyVector(MyVector<TypeOfElement> &outVector) {
+    for (int i = 0; i < outVector.Length(); ++i) {
+        std::cout << outVector[i] << "  ";
+    }
+    std::cout << std::endl;
+}
+
+int main() {
+    MyVector<int> vec1, vec2, vec3;
+    int N1 = 0, N2 = 0;
+    std::cout << "Input number of first vector elements and then input them: ";
+    std::cin >> N1;
+    std::cout << "Input number of second vector elements and then input them: ";
+    std::cin >> N2;
+    InputMyVector(vec1, N1);
+    InputMyVector(vec2, N2);
+    vec3 = vec1 + vec2;
+    OutputMyVector(vec3);
+    return 0;
+}
