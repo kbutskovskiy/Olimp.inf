@@ -1,0 +1,56 @@
+//Здесь я работал с итераторами
+//Задание: Реализуйте функцию, которая вернет уникальные слова в предложении. Слова могут разделяться ' ', ',', и '.'.
+
+
+//заголовочный файл. В работе было ещё множество заданий, поэтому заголовочный файл такой большой.
+#include <algorithm>
+#include <list>
+#include <map>
+#include <set>
+#include <string>
+#include <vector>
+
+#ifndef INCLUDE_LAB_HPP_
+#define INCLUDE_LAB_HPP_
+
+std::vector<int>::iterator Find(std::vector<int>::iterator,
+                                std::vector<int>::iterator, int);
+std::vector<int>::iterator findInSorted(std::vector<int>::iterator,
+                                        std::vector<int>::iterator, int);
+int wordsCounter(const std::string&);
+std::map<std::string, int> wordsMapCounter(const std::string&);
+std::vector<std::string> uniqueWords(const std::string&);
+int diffWordsCounter(const std::string&);
+void reverseNum(std::list<int>&);
+void plusesDeleter(std::vector<int>&);
+void Sort(std::list<int>&);
+
+
+#endif  // INCLUDE_LAB_HPP_
+std::vector<std::string> uniqueWords(const std::string& str) {
+  std::vector<std::string> unique_vec;
+  std::set<std::string> unique_set;
+  std::size_t pos = 0;
+  if (str.empty()) {
+    return unique_vec;
+  }
+  for (std::size_t i = 0; i < str.size(); ++i) {
+    if (str[i] == ' ' || str[i] == '.' || str[i] == ',') {
+      if ((str[i - 1] != ' ' && str[i - 1] != '.' && str[i - 1] != ',') &&
+          i >= 1) {
+        unique_set.insert(str.substr(pos, i - pos));
+        pos = i + 1;
+      } else {
+        ++pos;
+      }
+    }
+  }
+  if (str[str.size() - 1] != '.' && str[str.size() - 1] != ',' &&
+      str[str.size() - 1] != ' ') {
+    unique_set.insert(str.substr(pos, str.size() - pos));
+  }
+  for (const auto& it : unique_set) {
+    unique_vec.push_back(it);
+  }
+  return unique_vec;
+}
