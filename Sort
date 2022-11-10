@@ -1,3 +1,5 @@
+// Здесь реализовывал базовые сортировки
+
 #include <iostream>
 #include <string>
 
