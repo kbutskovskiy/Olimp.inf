@@ -1,0 +1,217 @@
+//Мой проект по трассировке лучей, написан на С
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+void interpolate(float x, float z, int nx, int nz, float *C, float dz, float dx, float Zc0, float Xc0,
+                 float *interpolate_rez) {
+    int kz3 = (int) ((z - Zc0) / dz);
+    float z3 = Zc0 + kz3 * dz;
+    int kx3 = (int) ((x - Xc0) / dx);
+    float x3 = Xc0 + kx3 * dx;
+    float z1 = z3 + dz;
+    int kz1 = (int) ((z3 + dz - Zc0) / dz);
+    float x4 = x3 + dx;
+    int kx4 = (int) ((x3 + dx - Xc0) / dx);
+    float f2 = C[kz1 + kx4 * nz]; // f2 
+    float f1 = C[kz1 + kx3 * nz]; // f1 
+    float f3 = C[kz3 + kx3 * nz]; // f3 
+    float f4 = C[kz3 + kx4 * nz]; // f4 
+    float f5 = f3 + ((f4 - f3) / (x4 - x3) * (x - x3));
+    float f6 = f1 + ((f2 - f1) / (x4 - x3) * (x - x3));
+    float c = f5 + ((f6 - f5) / (z1 - z3) * (z - z3));
+    //printf("%f  ", c );
+    interpolate_rez[0] = c;
+    interpolate_rez[1] = f6;
+    interpolate_rez[2] = f5;
+    interpolate_rez[3] = f4;
+    interpolate_rez[4] = f3;
+    interpolate_rez[5] = x4;
+    interpolate_rez[6] = x3;
+    interpolate_rez[7] = z1;
+    interpolate_rez[8] = z3;
+    interpolate_rez[9] = f2;
+    interpolate_rez[10] = f1;
+}
+
+float programm_diff_Px(float x4, float x3, float f4, float f3, float z1, float z3, float f2, float f1, float z) {
+    float rez1;
+    rez1 = ((f2 * z - f2 * z3 - f1 * z + f1 * z3 - f4 * z + f3 * z + (f4 - f3) * z1) /
+            (x4 * z1 - x3 * z1 - x4 * z3 + x3 * z3));
+    return rez1;
+} 
+
+float programm_diff_Pz(float f1, float f2, float x4, float x3, float x, float f3, float f4, float z1, float z3) {
+    float rez2;
+    rez2 = ((x4 * f1 - x3 * f1 + f2 * x - x3 * f2 - f1 * x + x3 * f1 - f4 * x + x3 * f4 + f3 * x - f3 * x3 - f3 * x4 +
+             x3 * f3) / (x4 * z1 - x4 * z3 - x3 * z1 + x3 * z3));
+    return rez2;
+}
+
+void calculate_ray(int nx, int nz, float *C, float *x, float *z, float *Px, float *Pz, float ds, float dx, float dz,
+                   float Xc0, float Zc0, float *velocity, float x0, float z0, float *interpolate_rez, int nraymax,
+                   int *nray, float *s, float *check_x, float *check_z, float z_centre_circle, float x_centre_circle,
+                   float R, float alpha) {
+    float Ze = dz * (nz - 1);
+    float Xe = dx * (nx - 1);
+    int k = 0;
+    for (int i = 1; i < nraymax; i++) {
+        interpolate(x[i - 1], z[i - 1], nx, nz, C, dz, dx, Zc0, Xc0, interpolate_rez);
+        velocity[i - 1] = interpolate_rez[0];
+        float rez1 = programm_diff_Px(interpolate_rez[5], interpolate_rez[6], 1 / interpolate_rez[3],
+                                      1 / interpolate_rez[4], interpolate_rez[7], interpolate_rez[8],
+                                      1 / interpolate_rez[9], 1 / interpolate_rez[10], z[i - 1]);
+        float rez2 = programm_diff_Pz(1 / interpolate_rez[10], 1 / interpolate_rez[9], interpolate_rez[5],
+                                      interpolate_rez[6], x[i - 1], 1 / interpolate_rez[4], 1 / interpolate_rez[3],
+                                      interpolate_rez[7], interpolate_rez[8]);
+        Px[i] = Px[i - 1] + ds * rez1;
+        Pz[i] = Pz[i - 1] + ds * rez2;
+        s[i] = ds * i;
+        x[i] = x[i - 1] + ds * (velocity[i - 1] * Px[i - 1]);
+        z[i] = z[i - 1] + ds * (velocity[i - 1] * Pz[i - 1]);
+        check_x[i] = ((-1) * R * cos(s[i] / R + alpha)) + x_centre_circle;
+        check_z[i] = (R * sin(s[i] / R + alpha) + z_centre_circle);
+        k = k + 1;
+        if (k >= nraymax) {
+            break;
+        } else {
+
+        }
+        if (x[i] >= Xe || x[i] <= Xc0) {
+            //printf("X_exit");
+            break;
+        } else {
+
+        }
+        if (z[i] >= Ze || z[i] <= Zc0) {
+            //printf("Z_exit");
+            break;
+        } else {
+
+        }
+    }
+    *nray = k - 1;
+}
+
+void check_velocity(const float *Px, const float *Pz, const float *velocity, int nz, int nx, int nraymax) {
+    for (int i = 0; i < nraymax; i++) {
+        if (Px[i] * Px[i] + Pz[i] * Pz[i] == 1 / (velocity[i] * velocity[i])) {
+
+        } else {
+            printf("Hello world\n");
+        }
+    }
+}
+
+int main() {
+
+    FILE *in;
+    in = fopen("C://Users//USER//Desktop//Programming//file_parameter.txt", "rt");
+
+    int nx;
+    int nz;
+    float x0;
+    float z0;
+    float Px0;
+    float Pz0;
+    int nraymax;
+    int nray;
+    float Xc0;
+    float Zc0;
+    float ds;
+    float dx;
+    float dz;
+    fscanf(in, "%d/n", &nx);
+    fscanf(in, "%d/n", &nz);
+    fscanf(in, "%f/n", &x0);
+    fscanf(in, "%f/n", &z0);
+    fscanf(in, "%f/n", &Px0);
+    fscanf(in, "%f/n", &Pz0);
+    fscanf(in, "%d/n", &nraymax);
+    fscanf(in, "%f/n", &Xc0);
+    fscanf(in, "%f/n", &Zc0);
+    fscanf(in, "%f/n", &ds);
+    fscanf(in, "%f/n", &dx);
+    fscanf(in, "%f/n", &dz);
+    fclose(in);
+    //in = fopen("C:\\Users\\??????\\Desktop\\gradient\\model_file.bin" , "rb");
+    in = fopen("C://Users//USER//Desktop//Programming//model_file.bin", "rb");
+    auto *C = (float *) malloc(nx * nz * sizeof(float));
+    int check = (int) (fread(C, sizeof(float), nx * nz, in));
+    if (check == 0) {
+        printf("error_reading");
+    } else {
+
+    }
+    fclose(in);
+    float interpolate_rez[11];
+    auto *velocity = (float *) malloc(nraymax * sizeof(float));
+    auto *x = (float *) malloc(nraymax * sizeof(float));
+    auto *z = (float *) malloc(nraymax * sizeof(float));
+    auto *Px = (float *) malloc(nraymax * sizeof(float));
+    auto *Pz = (float *) malloc(nraymax * sizeof(float));
+    auto *s = (float *) malloc(nraymax * sizeof(float));
+    auto *check_x = (float *) malloc(nraymax * sizeof(float));
+    auto *check_z = (float *) malloc(nraymax * sizeof(float));
+
+    s[0] = 0;
+    x[0] = x0;
+    z[0] = z0;
+
+
+    float alpha = 0;
+
+    float a = 1600;
+    float b = 3.1;
+    float z_centre_circle = -1 * a / b;
+    float R = (z0 - z_centre_circle) / sin(alpha);
+    float x_centre_circle = x0 + R * cos(alpha);
+
+    Px[0] = sin(alpha) / (a + b * z0);
+    Pz[0] = cos(alpha) / (a + b * z0);
+    Px0 = Px[0];
+    Pz0 = Pz[0];
+
+    check_x[0] = ((-1) * R * cos(alpha)) + x_centre_circle;
+    check_z[0] = (R * sin(alpha) + z_centre_circle);
+
+
+    calculate_ray(nx, nz, C, x, z, Px, Pz, ds, dx, dz, Xc0, Zc0, velocity, x0, z0, interpolate_rez, nraymax, &nray, s,
+                  check_x, check_z, z_centre_circle, x_centre_circle, R, alpha);
+    auto *ch = (float *) malloc(nray * sizeof(float));
+    auto *zn = (float *) malloc(nray * sizeof(float));
+    ch[0] = 0;
+    zn[0] = 0;
+    float mis = 0;
+    float max = 0;
+    for (int i = 1; i <= nray; i++) {
+        ch[i] = sqrt((x[i] - check_x[i]) * (x[i] - check_x[i]) + (z[i] - check_z[i]) * (z[i] - check_z[i]));
+        if (ch[i] >= ch[i - 1]) {
+            max = ch[i];
+        } else {
+
+        }
+        zn[i] = zn[i - 1] + sqrt(check_x[i] * check_x[i] + check_z[i] * check_z[i]);
+    }
+
+    for (int i = 0; i <= nray; i++) {
+        printf("i=%d, x=%f, z=%f, Pz=%f, Px=%f, vel=%f, Vel_p=%f, s=%f, chx=%f, chz=%f \n", i, x[i], z[i], Pz[i], Px[i],
+               velocity[i], 1 / sqrt(Pz[i] * Pz[i] + Px[i] * Px[i]), s[i], check_x[i], check_z[i]);
+        if (i == nray - 1) {
+        } else {
+
+        }
+    }
+    free(x);
+    free(z);
+    free(Px);
+    free(Pz);
+    free(velocity);
+    free(C);
+    free(s);
+    free(check_x);
+    free(check_z);
+    free(ch);
+    free(zn);
+    return 0;
