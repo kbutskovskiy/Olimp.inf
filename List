@@ -1,0 +1,76 @@
+//
+// Copyright 2022 kbutskovskiy kbutskovskiy@mail.ru
+//
+
+#include "list.hpp"
+
+void Construct(ForwardList& list) { list.Head = nullptr; }
+
+void PushFront(ForwardList& list, int value) {
+  auto* new_element = new ForwardList::Node;
+  new_element->Data = value;
+  new_element->Next = list.Head;
+  list.Head = new_element;
+}
+
+void PopFront(ForwardList& list) {
+  if (list.Head == nullptr) {
+    return;
+  }
+  auto* tmp_elem = list.Head->Next;
+  delete list.Head;
+  list.Head = tmp_elem;
+}
+
+void Destruct(ForwardList& list) {
+  while (list.Head != nullptr) {
+    PopFront(list);
+  }
+  delete list.Head;
+  list.Head = nullptr;
+}
+
+void RemoveAfter(ForwardList::Node* node) {
+  if (node == nullptr || node->Next == nullptr) {
+    return;
+  }
+  ForwardList::Node* new_elem = node->Next->Next;
+  delete node->Next;
+  node->Next = new_elem;
+}
+
+size_t Size(const ForwardList& list) {
+  size_t counter = 0;
+  ForwardList::Node* cur = list.Head;
+  while (cur != nullptr){
+    ++counter;
+    cur = cur->Next;
+  }
+  return counter;
+}
+
+ForwardList::Node* InsertAfter(ForwardList::Node* node, int value) {
+  if (node == nullptr) {
+    return nullptr;
+  }
+  auto* new_elem = new ForwardList::Node;
+  new_elem->Data = value;
+  new_elem->Next = node->Next;
+  node->Next = new_elem;
+  return node->Next;
+}
+
+void Reverse(ForwardList& list) {
+  ForwardList::Node* cur = list.Head;
+  ForwardList::Node* prev = nullptr;
+  if (cur == nullptr) {
+    return;
+  }
+  while (list.Head->Next != nullptr) {
+    cur = list.Head->Next;
+    list.Head->Next = prev;
+    prev = list.Head;
+    list.Head = cur;
+  }
+  list.Head->Next = prev;
+}
