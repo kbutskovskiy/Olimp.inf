@@ -1,0 +1,56 @@
+//
+// Copyright 2022 kbutskovskiy kbutskovskiy@mail.ru
+//
+
+#include "queue.hpp"
+
+void Construct(Queue& queue) {
+  queue.Head = nullptr;
+  queue.Tail = nullptr;
+}
+
+int Pop(Queue& queue) {
+  if (queue.Head == nullptr) {
+    return 0;
+  }
+  if (queue.Head == queue.Tail) {
+    delete queue.Head;
+    queue.Head = nullptr;
+    queue.Tail = nullptr;
+    return 0;
+  }
+  auto* cur = queue.Tail;
+  while (cur->Next != queue.Head) {
+    cur = cur->Next;
+  }
+  queue.Head = cur;
+  cur = cur->Next;
+  delete cur;
+  return queue.Head->Data;
+}
+
+void Push(Queue& queue, int value) {
+  auto* new_elem = new Queue::Node;
+  new_elem->Next = queue.Tail;
+  queue.Tail = new_elem;
+  if (queue.Head == nullptr) {
+    queue.Head = new_elem;
+  }
+  new_elem->Data = value;
+}
+
+void Destruct(Queue& queue) {
+  if (queue.Head == nullptr) {
+    return;
+  }
+  while (queue.Head != queue.Tail) {
+    Pop(queue);
+  }
+  delete queue.Tail;
+  queue.Tail = nullptr;
+  queue.Head = nullptr;
+}
+
+bool Empty(const Queue& queue) {
+  return queue.Head == nullptr;
+}
