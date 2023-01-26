@@ -1,0 +1,35 @@
+//
+// Copyright 2022 kbutskovskiy kbutskovskiy@mail.ru
+//
+
+#include "stack.hpp"
+
+void Construct(Stack& stack) { stack.Top = nullptr; }
+
+void Push(Stack& stack, int value) {
+  auto* new_elem = new Stack::Node;
+  new_elem->Data = value;
+  new_elem->Next = stack.Top;
+  stack.Top = new_elem;
+}
+
+int Pop(Stack& stack) {
+  if (stack.Top == nullptr) {
+    return 0;
+  }
+  Stack::Node* cur = stack.Top;
+  stack.Top = stack.Top->Next;
+  int data = cur->Data;
+  delete cur;
+  return data;
+}
+
+void Destruct(Stack& stack) {
+  while (stack.Top != nullptr) {
+    Pop(stack);
+  }
+}
+
+bool Empty(const Stack& stack) {
+  return stack.Top == nullptr;
+}
